@@ -1,220 +1,269 @@
 Your answers to the questions go here.
-# About Datadog
-Datadog is a data monitoring service for cloud-scale applications, bringing together data from servers, databases, tools, and services to present a unified view of an entire stack. These capabilities are provided on a SaaS-based data analytics platform. [Wiki](https://en.wikipedia.org/wiki/Datadog)
 
-### Features
-* Observability - From infrastructure to apps, in any environment
-* Dashboards - Use instant, real-time boards or build your own
-* Infrastructure - From overview to deep details, fast
-* Analytics - Custom app metrics or business KPIs
-* Collaboration - Share data, discuss in context, solve issues quickly
-* Alerts - Avoid alert fatigue with smart, actionable alerts
-* API - Love infrastructure as code? You'll love Datadog's API
-* Machine Learning - Automatically detect outliers and temporal anomalies
-* APM - Monitor, optimize, and troubleshoot app performance
+Note: I have also committed a PDF version of this file to git. It has better formatting and the images are inline with the answers. In this .md version, the screenshots are referenced as "See figure 1". 
 
-<a href="http://www.flickr.com/photos/alq666/10125225186/" title="The view from our roofdeck">
-<img src="http://farm6.staticflickr.com/5497/10125225186_825bfdb929.jpg" width="500" height="332" alt="_DSC4652"></a>
+Datadog Recruitment Candidate Exercise
+Cathy Swanton
+05/09/2018
 
-I am here to apply for the support engineer at [Datadog](http://datadog.com) Sydney.
+1. Collecting Metrics
 
+1.1. Adding Tags
+To add tags using the Agent config file, I followed the instructions in the following documentation: https://docs.datadoghq.com/tagging/assigning_tags/
 
-# The Challenge
+I edited the config file ‘/opt/datadog-agent/etc/datadog.yaml’ to include some sample tags, as shown in the image below. 
 
-## Questions
+**See figure 1 
+Figure 1 0 1. Adding tags in the Agent config file.
 
-### Level 0 (optional) - Setup an Ubuntu VM
+I then restarted the Agent using the following commands:
+>> launchctl stop com.datadoghq.agent
+>> launchctl start com.datadoghq.agent
 
-* While it is not required, we recommend that you spin up a fresh linux VM via Vagrant or other tools so that you don't run into any OS or dependency issues. [Here are instructions for setting up a Vagrant Ubuntu 12.04 VM.](https://www.vagrantup.com/docs/getting-started/)
->Answer: I am using macOS Sierra Version 10.12.6 for this Challenge.
 
+To confirm that these tags had been successfully added, I went to the Host Map in the UI. See image below.   
 
-### Level 1 - Collecting your Data
+**See figure 2
+Figure 1 0 2. Tags visible in Host Map.
 
-* Sign up for Datadog (use "Datadog Recruiting Candidate" in the "Company" field), get the Agent reporting metrics from your local machine.
 
->Answer: [Sign up here](https://www.datadoghq.com/#), get a datadog account for free for 14 days.
+1.2. Installing Datadog Integration
+To install a Datadog Integration, I first downloaded MySQL and then searched for MySQL in  Datadog. 
 
->login, click on [_integration-Agent_](https://app.datadoghq.com/account/settings#agent/mac) in DataDog on the left column and follow the installation instructions for Mac OS X to install the Agent.
+**See figure 3 
+Figure 1 0 3. Searching for MySQL in Datadog.
 
-> The datadog can be installed on OS X as easily as:
-```
-DD_API_KEY=63ab065b2982aed65fff538ba18a93ba bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/dd-agent/master/packaging/osx/install.sh)"
-```
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/Agent%20instalation%20and%20config.png" />
 
-* Bonus question: In your own words, what is the Agent?
+I clicked on the link and installed it. The image below shows that it has been successfully installed. 
 
->Answer: The Datadog agent is a full stack data monitoring platform/software which brings data from servers, databases, tools, and services to the Datadog web interface.
+**See figure 4
+Figure 1 0 4. MySQL integration installed.
 
-* Add tags in the Agent config file and show us a screenshot of your host and its tags on the Host Map page in Datadog.
 
->Answer: Change direction by type _cd ~/.datadog-agent_ in terminal, then type _emacs datadog.conf_ to open and edit the configuration file. 
-[reference](https://docs.datadoghq.com/guides/tagging/)
+1.3. Creating a Custom Agent Check
 
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/tagging%20in%20conf%20file.png" />
+To create a custom agent check, I followed the ‘Hello World’ example described on the website (https://docs.datadoghq.com/developers/agent_checks/). This example created a hello.world metric with a value of 1. After seeing how this was done, I created the ‘my_metric’ metric as follows:
 
-After a few minutes refresh the Datadog, go to [_Infrastructure - Host Map_](https://app.datadoghq.com/infrastructure/map?fillby=avg%3Acpuutilization&sizeby=avg%3Anometric&groupby=none&nameby=name&nometrichosts=false&tvMode=false&nogrouphosts=false&palette=green_to_orange&paletteflip=false), the tags are now shown in there.
+•	Create a file /opt/datadog-agent/etc/conf.d/mycheck.d/mycheck.yaml 
+This is essentially a dummy config file, with no real contents. 
 
+**See figure 5
+Figure 1 0 5. Yaml config file.
+•	Create a file /opt/datadog-agent/etc/checks.d/mycheck.py
+This python file will create a random variable between 0 and 1000 and add it to the metric ‘my_metric’ 
 
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/tagging%20in%20host%20map.png" />
+**See figure 6
+Figure 1 0 6. Python file.
+•	Restart the agent
+>> launchctl stop com.datadoghq.agent
+>> launchctl start com.datadoghq.agent
 
+This did not work as expected. When I went to the Datadog UI, I could not see my new metric ‘my_metric’. I could however see the ‘hello.world’ metric which was just being set to 1. The only difference between the two is that ‘my_metric’ is using randint to generate. I removed this from the code and just set an arbitrary value of 30. Still, I could not see the metric in the UI. Next, I tried removing the import line from the python code. This time I could see my new metric, with the assigned value of 30. 
 
-* Install a database on your machine (MongoDB, MySQL, or PostgreSQL) and then install the respective Datadog integration for that database.
+Since the ‘import random’ was causing some sort of problem, I tried to use the randint source code instead. This didn’t work either. At this point, I decided to move on with the rest of the exercise. I decided that it wasn’t worth wasting too much time here. There is probably some environment issues here that aren’t allowing me to import random (was able to import re and other modules in the code). For the rest of this exercise, I was able to manually change the value of my_metric to test different scenarios, so it did not prevent me from proceeding.  
 
->Answer: I am using PostgreSQL for this part, for how to download and install the software PostgreSQL please refer to -> [Download PostgreSQL here](https://www.postgresql.org/download/)
+1.4. Changing the Collection Interval
 
->Find the PostgreSQL API under [_Integrations-Integrations_](https://app.datadoghq.com/account/settings), click _install_, then click on _Configuration_ tab.
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/integration.png" />
+1.4.1. Using the Python check file
+To add a 45 second collection interval, you can add a delay in the Python code using the time module. See code implemented below. 
 
->Create a read-only datadog user with proper access to your PostgreSQL Server.
-```
-create user datadog with password 'password_for_datadog';
-grant SELECT ON pg_stat_database to datadog;
-```
->Configure the Agent to connect to the PostgreSQL server 
->Edit _conf.d/postgres.yaml_
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/postgres_yaml.png" />
+**See figure 7
+Figure 1 0 7. Changing the collection interval using Python code.
+1.4.2. Using the .yaml config file (Bonus Question)
+A nicer way of changing the collection interval is to use the .yaml config file. Add a 45 second collection interval as follows:
 
->Restart the Agent
+**See figure 8
+Figure 1 0 8. Changing the collection interval using the config file.
 
->Type _datadog-agent info_ in Terminal to check states.
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/postgreschecks.png" />
+To validate that this was successfully working, I plotted ‘my_metric’ and could see that the points were being added to the graph in 45 second intervals. The first image below shows a data point at 16:37:00 and the next is 45 seconds later at 16:37:45. 
+ 
+**See figure 9
+Figure 1 0 9. 45 second collection interval.
 
->Can also go to [_Dashboard-Dashboard List_](https://app.datadoghq.com/dash/list) to check whether it is working or not.
 
-* Write a custom Agent check that samples a random value. Call this new metric: `test.support.random`
+2. Visualizing Data
 
->Answer: Each check will have a configuration file that will be placed in the conf.d directory. Configuration is written using YAML. The file name should match the name of the check module (e.g. randomcheck.py and randomcheck.yaml).There are two places that you will need to add files for your check. 
-> The first is the checks.d folder, which lives in your Agent root. _~/.datadog-agent/checks.d/randomcheck.py_
+I created a new Timeboard called MyMetric. 
 
-```
-import random
-from checks import AgentCheck
-class RandomCheck(AgentCheck):
-    def check(self, instance):
-        self.gauge('test.support.random', random.random())
-```
+2.1. Custom Metric Timeseries
+In the new dashboard, I added a Timeseries graph for the average of my custom metric, ‘my_metric’. Since I only have one host, there was no need to specify which host. 
 
->The other folder is conf.d which lives in the Agent configuration root. _~/.datadog-agent/conf.d/randomcheck.yaml_
+**See figure 10
+Figure 2 1. Creating a timeseries for 'my_metric'.
 
-```
-init_config:
-instances:
-    [{}]
-```
+2.2. Using the Anomaly Function
+To create an Anomaly, I used the variable ‘system.cpu.idle’. The JSON code for the graph is given below. It is plotting an anomaly for system.cpu.idle using the agile method with a bounds value of 2. 
 
-[reference](https://docs.datadoghq.com/guides/agent_checks/)
+{
+  "viz": "timeseries",
+  "status": "done",
+  "requests": [
+    {
+      "q": "anomalies(avg:system.cpu.idle{*}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='hourly')",
+      "type": "line",
+      "style": {
+        "palette": "dog_classic",
+        "type": "solid",
+        "width": "normal"
+      },
+      "conditional_formats": [],
+      "aggregator": "avg"
+    }
+  ],
+  "autoscale": true
+}
 
-Here is a snippet that prints a random value in python:
+2.3. Using the Rollup Function
+I added a new timeseries graph to the dashboard for my custom metric. I then changed the JSON code to use the rollup function. The time is in seconds, so to sum all the points in the last hour will require a value of 3600. 
 
-```python
-import random
-print(random.random())
-```
+{
+  "viz": "timeseries",
+  "status": "done",
+  "requests": [
+    {
+      "q": "avg:my_metric{*}.rollup(sum, 3600)",
+      "type": "line",
+      "style": {
+        "palette": "dog_classic",
+        "type": "solid",
+        "width": "normal"
+      },
+      "conditional_formats": [],
+      "aggregator": "avg"
+    }
+  ],
+  "autoscale": true
+}
 
-### Level 2 - Visualizing your Data
 
-* Since your database integration is reporting now, clone your database integration dashboard and add additional database metrics to it as well as your `test.support.random` metric from the custom Agent check.
 
->Answer: Go to [_Dashboard-Dashboard List_](https://app.datadoghq.com/dash/list), select [_Postgres_](https://app.datadoghq.com/dash/integration/postgresql?live=true&page=0&is_auto=false&from_ts=1508633477863&to_ts=1508637077863&tile_size=m) under _Integration Dashboards_, then click on _Clone Dashboard_ on the top right corner.
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/clone%20dashboard.png" />
+2.4. Setting the Timeframe to 5 Minutes. 
+To change the timeframe to 5 minutes, I used the mouse to zoom in on the graph. 
 
->Click on add new graph and type _test.support.random_ in the Get then click Save.
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/new%20graph%20test_%20support_random.png" />
+**See figure 11 
+Figure 2 2. Dashboard with 5minute timeframe.
 
-[reference](https://docs.datadoghq.com/guides/templating/)
+2.5. Take a Snapshot of the Graph. 
+To take a snapshot of the graph I clicked on the camera icon and used the @ notation to send it to myself. Below is a sample of the email that will be received. 
 
-* Bonus question: What is the difference between a timeboard and a screenboard?
+**See figure 12
+Figure 2 3. Email received from snapshot.
 
->Answer: all graphs are always scoped to the same time in timeboard, but screenboard is flexible and more customisable, it can be created by drag and drop widgets.
+2.6. What is the Anomaly graph displaying? 
 
-[reference](https://help.datadoghq.com/hc/en-us/articles/204580349-What-is-the-difference-between-a-ScreenBoard-and-a-TimeBoard-)
+The anomaly graph displays any ‘abnormalities’ in the metric cpu.idle. Unfortunately, since I only have 1 day of data available, the anomalies are pretty meaningless. Ideally, I would have a couple of weeks worth of data and I would expect to see more normal patterns and therefore the algorithm would better detect anomalies. 
 
-* Take a snapshot of your `test.support.random` graph and draw a box around a section that shows it going above 0.90. Make sure this snapshot is sent to your email by using the @notification
+However, working with the limited data available, below is a plot of the cpu.idle metric over the last day. The grey region shows the bounds, or the range of values that the algorithm would regard as ‘normal’. Whenever the actual value is greater or less than these bounds, the trace is red. 
 
->Answer: click on the camera icon on the top right of the graph will get you a screenshot of the current graph, draw a box on the graph and type mesage @your_email, then the screenshot will be sent to your email address.
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/notification.png" />
+**See figure 13
+Figure 2 4. Anomaly Graph.
 
+3. Monitoring Data. 
 
-### Level 3 - Alerting on your Data
+3.1. Creating a Metric Monitor
 
-Since you've already caught your test metric going above 0.90 once, you don't want to have to continually watch this dashboard to be alerted when it goes above 0.90 again.  So let's make life easier by creating a monitor.
-* Set up a monitor on this metric that alerts you when it goes above 0.90 at least once during the last 5 minutes
+The screenshots below capture the process of creating a metric monitor and configuring the alert messages. The alert conditions send an alert message when the value exceeds 800 and a warning message when it exceeds 500 (red and yellow boxes, respectively, in step 3 in the image below). I have also enabled the option to notify if the data is missing for more than 10 minutes. 
 
->Answer: click on the [_setting icon - create Monitor_](https://app.datadoghq.com/monitors#create/metric?aggregator=avg&metric=test.support.random) on the top right of the graph
+**See figure 14
+Figure 3 1. Alert conidtions for metric monitor.
 
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/create%20monitor.png" />
+The figure below shows how to configure the monitor alerts. Different messages are sent for the three scenarios – alert, warning and no_data.   
+**See figure 15
+Figure 3 2. Configuring the notifications.
 
->1.Choose the detection method
 
->2.Select the metric and scope you want to monitor
+Since I could not get the random number generator to work, I just forced each of the scenarios below. I manually set my_metric in the Python code to different values so that I could see the warning and alert messages. 
 
->3.Select the alert grouping
+The figure below shows the email message received when the value exceeds 800. Unfortunately, the host.name variable is not being populated. Not too sure why…  
 
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/alert.png" />
+**See figure 16
+Figure 3 3. Sample Alert message.
 
-[reference](https://docs.datadoghq.com/guides/monitors/)
+And a sample email for the warning scenario (value between 500 and 800): 
 
-* Bonus points:  Make it a multi-alert by host so that you won't have to recreate it if your infrastructure scales up.
 
->Answer: select _Multi Alert_ under 2-Define the metric, has been done in the previous step.
->A simple alert aggregates over all reporting sources,You will get one alert when the aggregated value meets the conditions set below. This works best to monitor a metric from a single host. A multi alert applies the alert to each source, according to your group parameters.
+**See figure 17
+Figure 3 4. Sample Warning notification.
 
-* Give it a descriptive monitor name and message (it might be worth it to include the link to your previously created dashboard in the message).  Make sure that the monitor will notify you via email.
->Give the monitor a title. It is often useful to use a succinct explanation of the monitor so a notified team member can quickly understand what is going on.
+And finally, to validate the no_data case, I stopped the Agent for 10 minutes and got the following email. 
 
->Enter a message for the monitor. This field allows standard markdown formatting as well as @your_email_address.
+**See figure 18
+Figure 3 5. No_Data notification.
 
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/alert2.png" />
+3.2. Scheduling Downtime
 
+To schedule a downtime, I used the UI and went to Monitors->Manage Downtime. I scheduled two new downtimes. The first, shown below, silences the monitor for my_metric at 7PM for 14 hours (until 9AM) every day of the week. The image below shows the settings used. 
 
-* This monitor should alert you within 15 minutes. So when it does, take a screenshot of the email that it sends you.
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/email%20notif.png" />
+**See figure 19
+Figure 3 6. Downtime every evening from 7PM to 9AM.
 
+The second downtime I scheduled to start at one minute past midnight on Saturday morning and last for two days, to cover the entire weekend. This downtime will overlap with the evening one set previously, so the monitor will be ignored from 7PM on Friday evening until 9AM on Monday morning. These settings are shown in the image below. 
 
-* Bonus: Since this monitor is going to alert pretty often, you don't want to be alerted when you are out of the office. Set up a scheduled downtime for this monitor that silences it from 7pm to 9am daily. Make sure that your email is notified when you schedule the downtime and take a screenshot of that notification.
+**See figure 20
+Figure 3 7. Downtime scheduled for weekends.
+The images below show the email messages received after scheduling the downtimes. Note that the time zone is UTC, so at first the times look off! 
 
->Answer: [_Monitors - Manage Downtime - Schedule Downtime_](https://app.datadoghq.com/monitors#downtime)
+**See figure 21
+Figure 3 8. Email notification received for evening downtime.
 
->1.Choose what to silence.
+**See figure 22
+Figure 3 9. Email notification received for weekend downtime.
 
->2.Set a schedule.
 
->(optional)3-4.Add an optional message to notify your team
+4. Collecting APM Data
 
-<img src="https://github.com/jinmei612/datadog_screenshots/blob/master/upload/downtime.png" />
+I faced a few issues here. I saved the sample Flask application as my_app.py and installed ddtrace as instructed. However, when I ran the following command:
+>> ddtrace-run python my_app.py
 
+I got the following error messages: 
 
+**See figure 23
+Figure 4 1. Error message - connection refused.
 
-## Instructions
-If you have a question, create an issue in this repository.
+I tried multiple fixes, including killing the port:8126, running without the datadog trace, and editing the datadog.yaml configuration file to uncomment the line highlighted below. 
 
-To submit your answers:
+**See figure 24
+Figure 4 2. An attempted fix - changing the yaml config file.
 
-1. Fork this repo.
-2. Answer the questions in `answers.md`
-3. Commit as much code as you need to support your answers.
-4. Submit a pull request.
-5. Don't forget to include links to your dashboard(s), even better links *and* screenshots.  We recommend that you include your screenshots inline with your answers.
+None of these fixes worked however. I then stumbled upon these setup instructions: https://docs.datadoghq.com/tracing/setup/ and found that for MacOS, the TraceAgent is not pre-packaged with the standard Agent, as it is for Windows and Linux. So I then downloaded and ran the trace agent. 
 
-## References
+(Learning from this: read the instructions first before diving straight in and you will save yourself considerable time!!)
 
-### How to get started with Datadog
+**See figure 25
+Figure 4 3. Installing trace agent.
 
-* [Datadog overview](http://docs.datadoghq.com/overview/)
-* [Guide to graphing in Datadog](http://docs.datadoghq.com/graphing/)
-* [Guide to monitoring in Datadog](http://docs.datadoghq.com/guides/monitoring/)
+After properly reading the instructions, I again ran the ddtrace command with my app. No more error messages this time. I sent some requests to the app, using the following curl commands:
 
-### The Datadog Agent and Metrics
+**See figure 26
+Figure 4 4. Sending requests to the app.
 
-* [Guide to the Agent](http://docs.datadoghq.com/guides/basic_agent_usage/)
-* [Writing an Agent check](http://docs.datadoghq.com/guides/agent_checks/)
+Looking at the Datadog UI, I could now see some data (finally ☺). 
 
-### Other questions:
-* [Datadog Help Center](https://help.datadoghq.com/hc/en-us)
+**See figure 27
+Figure 4 5. APM dashboard.
 
-### About Me
-Mathematician, Computer Scientist, Barista, World Explorer
+I then exported the latency graph to a new Dashboard:
 
-[My Linkedin](https://www.linkedin.com/in/mei-jin/)
+**See figure 28
+Figure 4 6. Latency graph exported to timeboard.
+
+
+This is a link to the APM: 
+https://app.datadoghq.com/apm/services?start=1536105716744&end=1536109316744&paused=false&env=none&watchdogOnly=false
+
+
+
+
+Difference between a Service and a Resource
+
+A service is a set of processes that work together to provide a feature set. For examble, a web application might consist of two services – a webapp service and a database service. These two services provide different function for the same feature (web application). 
+
+A resource is a particular query to a service. Using the web application example again, a resource might be a canonical URL like /user/home. 
+
+
+ Final Question
+
+I would use Datadog to monitor how busy my gym is. A pet peeve of mine is going to the gym and finding it packed. Having to queue up to use a machine irritates me and it means it takes me longer to do my routine. To prevent this annoyance, I would use Datadog to monitor how many people are coming and going, so before I leave home I can decide whether or not it is worth my while. 
+
+I would setup a monitor to alert me when the metric is below a certain threshold, notifying me that it is a good time to go. I would schedule this monitor to only alert me during times when I would be interested in going – so say I would set a downtime while I am at work, and only get alerts in the evening. 
+
